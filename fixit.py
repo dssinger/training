@@ -53,7 +53,8 @@ for t in tbl:
                 row = [division, area, clubname, clubstatus, clubnumber]
                 offlist = []
                 trained = 0
-                for o in t.select("input:checkbox"):
+                for o in t.select('input[type="checkbox"]'):
+                    print o
                     if 'checked' in o.attrs:
                         trained += 1
                         offlist.append('X')
@@ -75,10 +76,15 @@ print 'results is %d long' % len(results)
 outfile = open('training.html', 'w')
 outfile.write("""<html><head><title>Training Status</title>
         <style type="text/css">
-        {fontname: Arial;}
+      
+        
+        body {font-family: "Myriad-Pro", Arial, sans serif}
+        tr, td, th {border-collapse: collapse; border-width: 1px; border-color: black; border-style: solid;}
+        table {margin-bottom: 24px; border-collapse: collapse; border-width: 1px; border-color: black; border-style: solid;}
+        .firstarea {margin-top: 12px; border-width-top: 2px;}
         .lucky {background-color: lightblue}
         .dcp {background-color: lightgreen}
-        .untrained {background-color: #E01010}
+        .untrained {background-color: #FF8E8E}
         .trainingtable {border-color: black; border-spacing: 0;}
         .trainingtable thead {font-weight: bold;}
         .page-break {page-break-before: always !important; break-before: always !important; display: block; float: none; position: relative;}
@@ -90,17 +96,24 @@ outfile.write("""<html><head><title>Training Status</title>
        </style></head>""")
 outfile.write("<body>")
 curdiv = ''
+curarea = ''
 for row in results:
     if row[0] != curdiv:
         makediv(outfile, row[0], curdiv)
         curdiv = row[0]
     outfile.write('<tr')
+    classes = []
+    if row[1] != curarea:
+        classes.append('firstarea')
+        curarea = row[1]
     if row[5] == 7:
-        outfile.write(' class="lucky"')
+        classes.append('lucky')
     elif row[5] >= 4:
-        outfile.write(' class="dcp"')
+        classes.append('dcp')
     elif row[5] == 0:
-        outfile.write(' class="untrained"')
+        classes.append('untrained')
+    if classes:
+        outfile.write(' class="%s"' % ' '.join(classes))
     outfile.write('>\n')
     for partnum in xrange(len(row)):
         outfile.write('<td')
