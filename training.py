@@ -5,21 +5,50 @@ import sys, re, xlsxwriter
 headers = "Div,Area,Club Name,Number,Status,Trained,Pres,VPE,VPM,VPPR,Sec,Treas,SAA"
 sheets = {}
 formats = {}
+colors = {}
+colors['lucky'] = '#ADD8E6'
+colors['dcp'] = '#90EE90'
+colors['untrained'] = '#FF8E8E'
+
+
 class mysheet:
+    @classmethod
+    def setup(self, outbook):
+        # Create the format objects we're going to need
+        self.align = 3*['left'] + ['right'] + ['left'] + ['right'] + 7*['center']
+
+        self.formats = {}
+        self.formats[''] = [outbook.add_format({'align': self.align[i]}) for i in xrange(len(self.align))]
+        self.formats['lucky'] = [outbook.add_format({'align': self.align[i], 'bg_color': colors['lucky']}) for i in xrange(len(self.align))]
+        self.formats['dcp'] = [outbook.add_format({'align': self.align[i], 'bg_color': colors['dcp']}) for i in xrange(len(self.align))]
+        self.formats['untrained'] = [outbook.add_format({'align': self.align[i], 'bg_color': colors['untrained']}) for i in xrange(len(self.align))]
+        self.formats['bold'] = [outbook.add_format({'align': self.align[i], 'bold': True}) for i in xrange(len(self.align))]
+        print 'setup complete'
+
     def __init__(self, outbook, divname):
-        print 'creating sheet for division "%s"' % divname
         self.sheet = outbook.add_worksheet('Division ' + divname)
-        self.sheet.write_row(0, 0, headers.split(','), formats['bold'])
+        elements = headers.split(',')
+        for i in xrange(len(elements)):
+            self.sheet.write(0, i, elements[i], self.formats['bold'][i])
         self.sheet.set_column('A:A', 3)
         self.sheet.set_column('B:B', 4)
-        self.sheet.set_column('C:C', 35)
-        self.sheet.set_column('D:D', 8, formats['right'])
-        self.sheet.set_column('G:M', 4, formats['center'])
+        self.sheet.set_column('C:C', 45)
+        self.sheet.set_column('D:D', 8)
+        self.sheet.set_column('G:M', 5)
         self.row = 1
         sheets[divname] = self
         
-    def addrow(self, row, format=None):
-        self.sheet.write_row(self.row, 0, row, format)
+    def addrow(self, row, classes):
+        if 'lucky' in classes:
+            format = self.formats['lucky']
+        elif 'dcp' in classes:
+            format = self.formats['dcp']
+        elif 'untrained' in classes:
+            format = self.formats['untrained']
+        else:
+            format = self.formats['']
+        for i in xrange(len(row)):
+            self.sheet.write(self.row, i, row[i], format[i])
         self.row += 1
     
 
@@ -95,6 +124,7 @@ results.sort()
 print 'results is %d long' % len(results)
 outfile = open('training.html', 'w')
 outbook = xlsxwriter.Workbook('training.xlsx')
+mysheet.setup(outbook)
 formats['bold'] =  outbook.add_format({'bold': True})
 xbold = formats['bold']
 formats['center'] = outbook.add_format()
@@ -135,19 +165,15 @@ for row in results:
         curdiv = row[0]
     outfile.write('<tr')
     classes = []
-    format = None
     if row[1] != curarea:
         classes.append('firstarea')
         curarea = row[1]
     if row[5] == 7:
         classes.append('lucky')
-        format = xlucky
     elif row[5] >= 4:
         classes.append('dcp')
-        format = xdcp
     elif row[5] == 0:
         classes.append('untrained')
-        format = xuntrained
     if classes:
         outfile.write(' class="%s"' % ' '.join(classes))
     outfile.write('>\n')
@@ -163,7 +189,7 @@ for row in results:
             outfile.write(' class="tstat"')
         outfile.write('>%s</td>\n' % row[partnum])
     outfile.write('</tr>\n')
-    sheets[curdiv].addrow(row, format)
+    sheets[curdiv].addrow(row, classes)
         
 outfile.write('</tbody>\n</table>\n</div>\n')
 outfile.write('</body></html>\n')
