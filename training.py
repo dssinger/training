@@ -4,7 +4,6 @@ from bs4 import BeautifulSoup
 import sys, re, xlsxwriter
 headers = "Div,Area,Club Name,Number,Status,Trained,Pres,VPE,VPM,VPPR,Sec,Treas,SAA"
 sheets = {}
-formats = {}
 colors = {}
 colors['lucky'] = '#ADD8E6'
 colors['dcp'] = '#90EE90'
@@ -125,18 +124,6 @@ print 'results is %d long' % len(results)
 outfile = open('training.html', 'w')
 outbook = xlsxwriter.Workbook('training.xlsx')
 mysheet.setup(outbook)
-formats['bold'] =  outbook.add_format({'bold': True})
-xbold = formats['bold']
-formats['center'] = outbook.add_format()
-formats['center'].set_align('center')
-formats['right'] = outbook.add_format()
-formats['right'].set_align('right')
-xlucky = outbook.add_format()
-xlucky.set_bg_color('#ADD8E6')
-xdcp = outbook.add_format()
-xdcp.set_bg_color('#90EE90')
-xuntrained = outbook.add_format()
-xuntrained.set_bg_color('#FF8E8E')
 outfile.write("""<html><head><title>Training Status</title>
         <style type="text/css">
         body {font-family: "Myriad-Pro", Arial, sans serif}
