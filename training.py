@@ -1,14 +1,36 @@
 #!/usr/bin/python
 """ Try to convert the Toastmasters training page into something tolerable """
 from bs4 import BeautifulSoup
-import sys, re
-def makediv(outfile, divname, curdiv):
+import sys, re, xlsxwriter
+headers = "Div,Area,Club Name,Number,Status,Trained,Pres,VPE,VPM,VPPR,Sec,Treas,SAA"
+sheets = {}
+formats = {}
+class mysheet:
+    def __init__(self, outbook, divname):
+        print 'creating sheet for division "%s"' % divname
+        self.sheet = outbook.add_worksheet('Division ' + divname)
+        self.sheet.write_row(0, 0, headers.split(','), formats['bold'])
+        self.sheet.set_column('A:A', 3)
+        self.sheet.set_column('B:B', 4)
+        self.sheet.set_column('C:C', 35)
+        self.sheet.set_column('D:D', 8, formats['right'])
+        self.sheet.set_column('G:M', 4, formats['center'])
+        self.row = 1
+        sheets[divname] = self
+        
+    def addrow(self, row, format=None):
+        self.sheet.write_row(self.row, 0, row, format)
+        self.row += 1
+    
+
+def makediv(outfile, outbook, divname, curdiv):
+    divname = divname
+    mysheet(outbook, divname)
     if curdiv:
         outfile.write('</tbody>\n')
         outfile.write('</table>\n')
         outfile.write('</div>\n')
-    headers = "Div,Area,Club Name,Number,Status,Trained,Pres,VPE,VPM,VPPR,Sec,Treas,SAA"
-    outfile.write('<div class="page-break"></div>\n')
+        outfile.write('<div class="page-break"></div>\n')
     outfile.write('<div id="training-div-%s" class="trainingdiv">\n' % divname)
     outfile.write('<table>')
     outfile.write('<colgroup>' +
@@ -39,7 +61,6 @@ soup = BeautifulSoup(open(sys.argv[1], 'r'))
 thediv = soup.select('div[id*="DistrictTraining"]')[0]
 mydiv = BeautifulSoup(repr(thediv))
 tbl = mydiv.select('table tbody tr td table tbody')[-1]
-print len(tbl)
 # Now we just power through the rows.  If they have an Area/Division, use it.
 for t in tbl:
     if t.name == 'tr':
@@ -54,7 +75,6 @@ for t in tbl:
                 offlist = []
                 trained = 0
                 for o in t.select('input[type="checkbox"]'):
-                    print o
                     if 'checked' in o.attrs:
                         trained += 1
                         offlist.append('X')
@@ -67,17 +87,28 @@ for t in tbl:
             contents = ' '.join(t.stripped_strings)
             match = finder.match(contents)
             if match:
-                area = match.group(1)
-                division = match.group(2)
+                area = match.group(1).strip()
+                division = match.group(2).strip()
 
-# Now, create the HTML result file.
+# Now, create the HTML result file and the matching Excel spreadsheet
 results.sort()
 print 'results is %d long' % len(results)
 outfile = open('training.html', 'w')
+outbook = xlsxwriter.Workbook('training.xlsx')
+formats['bold'] =  outbook.add_format({'bold': True})
+xbold = formats['bold']
+formats['center'] = outbook.add_format()
+formats['center'].set_align('center')
+formats['right'] = outbook.add_format()
+formats['right'].set_align('right')
+xlucky = outbook.add_format()
+xlucky.set_bg_color('#ADD8E6')
+xdcp = outbook.add_format()
+xdcp.set_bg_color('#90EE90')
+xuntrained = outbook.add_format()
+xuntrained.set_bg_color('#FF8E8E')
 outfile.write("""<html><head><title>Training Status</title>
         <style type="text/css">
-      
-        
         body {font-family: "Myriad-Pro", Arial, sans serif}
         tr, td, th {border-collapse: collapse; border-width: 1px; border-color: black; border-style: solid;}
         table {margin-bottom: 24px; border-collapse: collapse; border-width: 1px; border-color: black; border-style: solid;}
@@ -97,21 +128,26 @@ outfile.write("""<html><head><title>Training Status</title>
 outfile.write("<body>")
 curdiv = ''
 curarea = ''
+
 for row in results:
     if row[0] != curdiv:
-        makediv(outfile, row[0], curdiv)
+        makediv(outfile, outbook, row[0], curdiv)
         curdiv = row[0]
     outfile.write('<tr')
     classes = []
+    format = None
     if row[1] != curarea:
         classes.append('firstarea')
         curarea = row[1]
     if row[5] == 7:
         classes.append('lucky')
+        format = xlucky
     elif row[5] >= 4:
         classes.append('dcp')
+        format = xdcp
     elif row[5] == 0:
         classes.append('untrained')
+        format = xuntrained
     if classes:
         outfile.write(' class="%s"' % ' '.join(classes))
     outfile.write('>\n')
@@ -127,7 +163,9 @@ for row in results:
             outfile.write(' class="tstat"')
         outfile.write('>%s</td>\n' % row[partnum])
     outfile.write('</tr>\n')
+    sheets[curdiv].addrow(row, format)
         
 outfile.write('</tbody>\n</table>\n</div>\n')
 outfile.write('</body></html>\n')
 outfile.close()
+outbook.close()
