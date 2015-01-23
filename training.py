@@ -18,11 +18,11 @@ class mysheet:
         self.align = 3*['left'] + ['right'] + ['left'] + ['right'] + 7*['center']
 
         self.formats = {}
-        self.formats[''] = [outbook.add_format({'align': self.align[i]}) for i in xrange(len(self.align))]
-        self.formats['lucky'] = [outbook.add_format({'align': self.align[i], 'bg_color': colors['lucky']}) for i in xrange(len(self.align))]
-        self.formats['dcp'] = [outbook.add_format({'align': self.align[i], 'bg_color': colors['dcp']}) for i in xrange(len(self.align))]
-        self.formats['untrained'] = [outbook.add_format({'align': self.align[i], 'bg_color': colors['untrained']}) for i in xrange(len(self.align))]
-        self.formats['bold'] = [outbook.add_format({'align': self.align[i], 'bold': True}) for i in xrange(len(self.align))]
+        self.formats[''] = [outbook.add_format({'border':1, 'align': self.align[i]}) for i in xrange(len(self.align))]
+        self.formats['lucky'] = [outbook.add_format({'border':1, 'align': self.align[i], 'bg_color': colors['lucky']}) for i in xrange(len(self.align))]
+        self.formats['dcp'] = [outbook.add_format({'border':1, 'align': self.align[i], 'bg_color': colors['dcp']}) for i in xrange(len(self.align))]
+        self.formats['untrained'] = [outbook.add_format({'border':1, 'align': self.align[i], 'bg_color': colors['untrained']}) for i in xrange(len(self.align))]
+        self.formats['bold'] = [outbook.add_format({'border':1, 'align': self.align[i], 'bold': True}) for i in xrange(len(self.align))]
         print 'setup complete'
 
     def __init__(self, outbook, divname):
