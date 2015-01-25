@@ -4,9 +4,12 @@
     Otherwise, exit with a status of 1. """
 
 import dropbox
+state_file = 'token_store.txt'
+appinfo_file = 'tokens.txt'
+
 
 def authorize():
-    appinfo = open('tokens.txt','r')
+    appinfo = open(appinfo_file,'r')
     for l in appinfo.readlines():
         (name, value) = l.split(':',1)
         name = name.strip().lower()
@@ -24,22 +27,54 @@ def authorize():
     print '3. Copy the authorization code.'
     code = raw_input("Enter the authorization code here: ").strip()
     token, user_id = flow.finish(code)
-    out = open('token_store.txt', 'w')
+    out = open(state_file, 'w')
     out.write('oauth2:%s\n' % token)
     out.close()
     return token
 
 
 token = None
-tokinfo = open('token_store.txt', 'r')
-for l in tokinfo.readlines():
-    (name, value) = l.strip().split(':')
-    if name == 'oauth2':
-        token = value
-tokinfo.close()
+delta_cursor = None
+try:
+    tokinfo = open(state_file, 'r')
+    for l in tokinfo.readlines():
+        (name, value) = l.strip().split(':')
+        if name == 'oauth2':
+            token = value
+        elif name == 'delta_cursor':
+            delta_cursor = value
+    tokinfo.close()
+except IOError:
+    pass
 if not token:
     token = authorize()
 
 # If we get here, we are authorized.
 client = dropbox.client.DropboxClient(token)
-print 'linked account: ', client.account_info()
+
+# The only files we care about are in the training directory
+path = '/training'
+
+has_more = True
+lasthtml = None
+
+while has_more:
+    delta = client.delta(delta_cursor, path)   # See if anything has happened
+
+    # No matter what, we want to write the cursor out to the state file
+
+    tokinfo = open(state_file, 'w')
+    tokinfo.write('oauth2:%s\ndelta_cursor:%s\n' % (token, delta['cursor']))
+    tokinfo.close()
+
+    # Be ready for 'has_more', unlikely though it is:
+    has_more = delta['has_more']
+    print 'has_more:', has_more
+
+    # All we care about is changes to .html or .htm files.  
+    print 'we have %d entries', len(delta['entries'])
+    for (filename, metadata) in delta['entries']:
+        print filename
+        print metadata
+        print '-------------------'
+
