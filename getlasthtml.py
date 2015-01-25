@@ -4,6 +4,11 @@
     Otherwise, exit with a status of 1. """
 
 import dropbox
+import json
+import os.path
+import datetime
+import sys
+
 state_file = 'token_store.txt'
 appinfo_file = 'tokens.txt'
 
@@ -56,7 +61,8 @@ client = dropbox.client.DropboxClient(token)
 path = '/training'
 
 has_more = True
-lasthtml = None
+lastfile = None
+lasttime = datetime.datetime.min   # For easy comparisons
 
 while has_more:
     print 'delta_cursor: %s' % delta_cursor
@@ -75,9 +81,31 @@ while has_more:
     print 'has_more:', has_more
 
     # All we care about is changes to .html or .htm files.  
-    print 'we have %d entries', len(delta['entries'])
+    print 'we have %d entries' % len(delta['entries'])
     for (filename, metadata) in delta['entries']:
         print filename
         print metadata
         print '-------------------'
+        ext = os.path.splitext(filename)[1]
+        if ext == 'htm' or ext == 'html':
+            # We might care, but only if this is the latest one.
+            fileinfo = json.loads(metadata)
+            filetime = datetime.strptime(fileinfo['modified'], "%a, %d %b %Y %H:%M:%S %z")
+            if (filename > lasttime):
+                lastfile = filename
+                lasttime = filetime
+
+
+# OK, if any HTML files were updated, we have the name of the latest in 
+# 'lastfile'.  Go get it.
+
+if lastfile:
+    outfile = open('latest.html', 'wb')
+    with client.get_file(filename) as f:
+        outfile.write(f.read())
+    outfile.close()
+    sys.exit(0)
+
+# If we get here, nothing has happened.  Exit RC=1
+sys.exit(1)
 
