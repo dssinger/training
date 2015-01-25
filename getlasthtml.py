@@ -4,12 +4,11 @@
     Otherwise, exit with a status of 1. """
 
 import dropbox
-import json
 import os.path
 import datetime
 import sys
 
-state_file = 'token_store.txt'
+state_file = 'state.txt'
 appinfo_file = 'tokens.txt'
 
 
@@ -82,16 +81,20 @@ while has_more:
 
     # All we care about is changes to .html or .htm files.  
     print 'we have %d entries' % len(delta['entries'])
-    for (filename, metadata) in delta['entries']:
+    for (filename, fileinfo) in delta['entries']:
         print filename
-        print metadata
+        print fileinfo
         print '-------------------'
         ext = os.path.splitext(filename)[1]
-        if ext == 'htm' or ext == 'html':
-            # We might care, but only if this is the latest one.
-            fileinfo = json.loads(metadata)
+        print ext
+        if fileinfo and ext in ['.htm', '.html']:
+            print 'Checking on ', filename
+            # We care about HTML files, but only ones which exist.
+            # We only want to keep the very latest HTML file.
             filetime = datetime.strptime(fileinfo['modified'], "%a, %d %b %Y %H:%M:%S %z")
+            print 'filetime is %s', datetime.strftime(filetime)
             if (filename > lasttime):
+                print 'it\'s later'
                 lastfile = filename
                 lasttime = filetime
 
