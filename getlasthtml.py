@@ -5,7 +5,7 @@
 
 import dropbox
 import os.path
-import datetime
+from datetime import datetime
 import sys
 
 state_file = 'state.txt'
@@ -61,7 +61,7 @@ path = '/training'
 
 has_more = True
 lastfile = None
-lasttime = datetime.datetime.min   # For easy comparisons
+lasttime = datetime.min   # For easy comparisons
 
 while has_more:
     print 'delta_cursor: %s' % delta_cursor
@@ -91,9 +91,11 @@ while has_more:
             print 'Checking on ', filename
             # We care about HTML files, but only ones which exist.
             # We only want to keep the very latest HTML file.
-            filetime = datetime.strptime(fileinfo['modified'], "%a, %d %b %Y %H:%M:%S %z")
-            print 'filetime is %s', datetime.strftime(filetime)
-            if (filename > lasttime):
+            # We assume consistency in timezone from Dropbox...
+            fileinfo['modified'] = ' '.join(fileinfo['modified'].split()[1:5])
+            filetime = datetime.strptime(fileinfo['modified'], "%d %b %Y %H:%M:%S")
+            print 'filetime is %s', repr(filetime)
+            if (filetime > lasttime):
                 print 'it\'s later'
                 lastfile = filename
                 lasttime = filetime
