@@ -1,4 +1,4 @@
-#!/usr/bin/python
+#!/usr/bin/python2.7
 """ Try to convert the Toastmasters training page into something tolerable """
 from bs4 import BeautifulSoup
 import sys, re, xlsxwriter
@@ -121,8 +121,8 @@ for t in tbl:
 # Now, create the HTML result file and the matching Excel spreadsheet
 results.sort()
 print 'results is %d long' % len(results)
-outfile = open('training.html', 'w')
-outbook = xlsxwriter.Workbook('training.xlsx')
+outfile = open('report.html', 'w')
+outbook = xlsxwriter.Workbook('report.xlsx')
 mysheet.setup(outbook)
 outfile.write("""<html><head><title>Training Status</title>
         <style type="text/css">
