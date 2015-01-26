@@ -64,8 +64,6 @@ lastfile = None
 lasttime = datetime.min   # For easy comparisons
 
 while has_more:
-    print 'delta_cursor: %s' % delta_cursor
-    print 'path: %s' % path
     delta = client.delta(delta_cursor, path)   # See if anything has happened
 
     # No matter what, we want to write the cursor out to the state file
@@ -77,26 +75,17 @@ while has_more:
     # Be ready for 'has_more', unlikely though it is:
     has_more = delta['has_more']
     delta_cursor = delta['cursor']
-    print 'has_more:', has_more
 
     # All we care about is changes to .html or .htm files.  
-    print 'we have %d entries' % len(delta['entries'])
     for (filename, fileinfo) in delta['entries']:
-        print filename
-        print fileinfo
-        print '-------------------'
         ext = os.path.splitext(filename)[1]
-        print ext
         if fileinfo and ext in ['.htm', '.html']:
-            print 'Checking on ', filename
             # We care about HTML files, but only ones which exist.
             # We only want to keep the very latest HTML file.
             # We assume consistency in timezone from Dropbox...
             fileinfo['modified'] = ' '.join(fileinfo['modified'].split()[1:5])
             filetime = datetime.strptime(fileinfo['modified'], "%d %b %Y %H:%M:%S")
-            print 'filetime is %s', repr(filetime)
             if (filetime > lasttime):
-                print 'it\'s later'
                 lastfile = filename
                 lasttime = filetime
 
