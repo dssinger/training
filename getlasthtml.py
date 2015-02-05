@@ -78,6 +78,7 @@ while has_more:
 
     # All we care about is changes to .html or .htm files.  
     for (filename, fileinfo) in delta['entries']:
+        print filename
         ext = os.path.splitext(filename)[1]
         if fileinfo and ext in ['.htm', '.html']:
             # We care about HTML files, but only ones which exist.
