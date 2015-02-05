@@ -97,9 +97,9 @@ for t in tbl:
             if cname in [u'even', u'odd']:
                 parts = t.select('td')
                 clubname = ''.join(parts[1].stripped_strings)
-                clubstatus = ''.join(parts[3].stripped_strings)
-                clubnumber = ''.join(parts[2].stripped_strings)
-                row = [division, area, clubname, clubstatus, clubnumber]
+                clubstatus = ''.join(parts[2].stripped_strings)
+                clubnumber = int(''.join(parts[3].stripped_strings))
+                row = [division, area, clubname, clubnumber, clubstatus]
                 offlist = []
                 trained = 0
                 for o in t.select('input[type="checkbox"]'):
@@ -119,7 +119,7 @@ for t in tbl:
                 division = match.group(2).strip()
 
 # Now, create the HTML result file and the matching Excel spreadsheet
-results.sort()
+results.sort(key=lambda x:(x[0], x[1], x[3]))
 print 'results is %d long' % len(results)
 outfile = open('report.html', 'w')
 outbook = xlsxwriter.Workbook('report.xlsx')
