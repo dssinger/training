@@ -195,8 +195,7 @@ outbook.close()
 # Now, create the Lucky 7 file
 
 outfile = open('lucky7.html', 'w')
-outfile.write("""<p id="lucky7"><strong>Clubs with all 7 Officers Trained</strong></p>
-<p>Clubs which have all 7 officers trained before the end of August receive $75 in District Credit.  This report was updated on %s.</p>
+outfile.write("""<p>Clubs which have all 7 officers trained before the end of August receive $75 in District Credit.  This report was updated on %s.</p>
 """ % (datetime.today().strftime('%m/%d/%Y')))
 
 # And create the fragment
