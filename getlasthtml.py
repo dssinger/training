@@ -78,7 +78,8 @@ while has_more:
 
     # All we care about is changes to .html or .htm files.  
     for (filename, fileinfo) in delta['entries']:
-        print filename
+        if fileinfo:
+            print filename
         ext = os.path.splitext(filename)[1]
         if fileinfo and ext in ['.htm', '.html']:
             # We care about HTML files, but only ones which exist.
@@ -96,9 +97,11 @@ while has_more:
 
 if lastfile:
     outfile = open('latest.html', 'wb')
-    with client.get_file(filename) as f:
+    with client.get_file(lastfile) as f:
         outfile.write(f.read())
     outfile.close()
+    with open('fileinfo.txt', 'wb') as outfile:
+        outfile.write('%s\n' % (lastfile))
     sys.exit(0)
 
 # If we get here, nothing has happened.  Exit RC=1

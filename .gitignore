@@ -1,4 +1,6 @@
 *.html
 *.xlsx
 token*
-state.txt
+*.txt
+*.yml
+doit.sh
