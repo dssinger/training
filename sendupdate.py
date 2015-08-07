@@ -11,14 +11,17 @@ except yaml.YAMLError, exc:
     sys.exit(2)
 
 try:
-    filemsg = ' based on the data in ' +  sys.argv[2]
-except IndexError:
+    filemsg = ' based on the data in ' +  open('fileinfo.txt').readline()[:-1]
+except:
     filemsg = ''
 
 
 def sendmail(info):
     print 'Sending update notice'
-    message = MIMEText('The training reports have been updated%s. See http://d4tm.org/files/training/report.html' % filemsg)
+    mtext = """The training reports have been updated%s.
+See http://d4tm.org/files/training/report.html.  
+There is also an Excel version of the report at http://d4tm.org/files/training/report.xlsx.""" % filemsg
+    message = MIMEText(mtext)
     message['Subject'] = 'The training reports have been updated.'
     message['From'] = info['from']
     message['To'] = info['to']
