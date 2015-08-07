@@ -151,6 +151,8 @@ outfile.write("<body>")
 curdiv = ''
 curarea = ''
 
+lucky = []
+
 for row in results:
     if row[0] != curdiv:
         makediv(outfile, outbook, row[0], curdiv)
@@ -162,6 +164,7 @@ for row in results:
         curarea = row[1]
     if row[5] == 7:
         classes.append('lucky')
+        lucky.append(row)
     elif row[5] >= 4:
         classes.append('dcp')
     elif row[5] == 0:
@@ -187,3 +190,41 @@ outfile.write('</tbody>\n</table>\n</div>\n')
 outfile.write('</body></html>\n')
 outfile.close()
 outbook.close()
+
+# Now, create the Lucky 7 file
+
+outfile = open('lucky7.html', 'w')
+outfile.write('<h4 id="lucky7">Lucky 7 Clubs</h4>\n')
+
+# And create the fragment
+outfile.write("""<table style="margin-left: auto; margin-right: auto; padding: 4px;">
+  <tbody>
+    <tr valign="top">
+      <td><strong>Area</strong></td>
+      <td><strong>Club</strong></td>
+      <td><strong>&nbsp;</strong></td>
+      <td><strong>Area</strong></td>
+      <td><strong>Club</strong></td>
+  </tr>
+""")
+
+# We want to go down, not across...
+incol1 = (1 + len(lucky)) / 2# Number of items in the first column.  
+left = 0  # Start with the zero'th item
+for i in range(incol1):
+	club = lucky[i]
+	outfile.write('<tr>\n')
+	outfile.write('  <td>%s%d</td><td>%s</td>\n' % (club[0], int(club[1]), club[2]))
+	outfile.write('  <td>&nbsp;</td>\n')
+	try:
+		club = lucky[i+incol1]   # For the right column
+	except IndexError:
+		outfile.write('<td>&nbsp;</td><td>&nbsp;</td>\n')    # Close up the row neatly
+		outfile.write('</tr>\n')
+		break
+	outfile.write('  <td>%s%d</td><td>%s</td>\n' % (club[0], int(club[1]), club[2]))
+	outfile.write('</tr>\n')
+
+outfile.write("""  </tbody>
+</table>
+""")
