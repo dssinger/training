@@ -2,6 +2,7 @@
 """ Try to convert the Toastmasters training page into something tolerable """
 from bs4 import BeautifulSoup
 import sys, re, xlsxwriter
+from datetime import datetime
 headers = "Div,Area,Club Name,Number,Status,Trained,Pres,VPE,VPM,VPPR,Sec,Treas,SAA"
 sheets = {}
 colors = {}
@@ -194,7 +195,9 @@ outbook.close()
 # Now, create the Lucky 7 file
 
 outfile = open('lucky7.html', 'w')
-outfile.write('<h4 id="lucky7">Lucky 7 Clubs</h4>\n')
+outfile.write("""<p id="lucky7"><strong>Clubs with all 7 Officers Trained</strong></p>
+<p>Clubs which have all 7 officers trained before the end of August receive $75 in District Credit.  This report was updated on %s.</p>
+""" % (datetime.today().strftime('%m/%d/%Y')))
 
 # And create the fragment
 outfile.write("""<table style="margin-left: auto; margin-right: auto; padding: 4px;">
