@@ -82,7 +82,7 @@ def makediv(outfile, outbook, divname, curdiv):
     outfile.write('<tbody>')
 
 
-finder = re.compile(r'.*AREA *([0-9]*) *DIVISION *([A-Za-z] *)')
+finder = re.compile(r'.*AREA *([0-9A]*) *DIVISION *(0?[A-Za-z] *)')
 results = []
 soup = BeautifulSoup(open(sys.argv[1], 'r'))
 # From what I see in the documentation, I should be able to use one select, but it fails, so I'll break it up.
@@ -99,6 +99,9 @@ for t in tbl:
                 clubname = ''.join(parts[1].stripped_strings)
                 clubstatus = ''.join(parts[2].stripped_strings)
                 clubnumber = int(''.join(parts[3].stripped_strings))
+                # Omit suspended clubs
+                if clubstatus == 'S':
+                    continue
                 row = [division, area, clubname, clubnumber, clubstatus]
                 offlist = []
                 trained = 0
@@ -117,6 +120,8 @@ for t in tbl:
             if match:
                 area = match.group(1).strip()
                 division = match.group(2).strip()
+                if area == '0A':
+                    division = '0D'
 
 # Now, create the HTML result file and the matching Excel spreadsheet
 results.sort(key=lambda x:(x[0], x[1], x[3]))
