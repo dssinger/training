@@ -199,15 +199,17 @@ outfile.write("""<p>Clubs which have all 7 officers trained before the end of Au
 """ % (datetime.today().strftime('%m/%d/%Y')))
 
 # And create the fragment
-outfile.write("""<table style="margin-left: auto; margin-right: auto; padding: 4px;">
-  <tbody>
+outfile.write("""<table style="margin-left: auto; margin-right: auto; padding: 4px;" class="DSSbtable">
+  <thead>
     <tr valign="top">
-      <td><strong>Area</strong></td>
-      <td><strong>Club</strong></td>
-      <td><strong>&nbsp;</strong></td>
-      <td><strong>Area</strong></td>
-      <td><strong>Club</strong></td>
+      <th><strong>Area</strong></th>
+      <th><strong>Club</strong></th>
+      <th><strong>&nbsp;</strong></th>
+      <th><strong>Area</strong></th>
+      <th><strong>Club</strong></th>
   </tr>
+  </thead>
+  <tbody>
 """)
 
 # We want to go down, not across...
@@ -221,7 +223,7 @@ for i in range(incol1):
 	try:
 		club = lucky[i+incol1]   # For the right column
 	except IndexError:
-		outfile.write('<td>&nbsp;</td><td>&nbsp;</td>\n')    # Close up the row neatly
+		#outfile.write('<td>&nbsp;</td><td>&nbsp;</td>\n')    # Close up the row neatly
 		outfile.write('</tr>\n')
 		break
 	outfile.write('  <td>%s%d</td><td>%s</td>\n' % (club[0], int(club[1]), club[2]))
