@@ -199,7 +199,7 @@ outfile.write("""<p>Clubs which have all 7 officers trained before the end of Au
 """ % (datetime.today().strftime('%m/%d/%Y')))
 
 # And create the fragment
-outfile.write("""<table style="margin-left: auto; margin-right: auto; padding: 4px;" class="DSSbtable">
+outfile.write("""<table class="DSSbtable">
   <thead>
     <tr valign="top">
       <th><strong>Area</strong></th>
