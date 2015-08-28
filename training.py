@@ -198,19 +198,25 @@ outfile = open('lucky7.html', 'w')
 outfile.write("""<p>Clubs which have all 7 officers trained before the end of August receive $75 in District Credit.  This report was updated on %s.</p>
 """ % (datetime.today().strftime('%m/%d/%Y')))
 
+styles = {}
+if len(lucky) > 1:
+    styles['v'] = ""
+else:
+    styles['v'] = ' style="visibility: hidden;"'
+
 # And create the fragment
 outfile.write("""<table class="DSSbtable">
   <thead>
     <tr valign="top">
       <th><strong>Area</strong></th>
       <th><strong>Club</strong></th>
-      <th><strong>&nbsp;</strong></th>
-      <th><strong>Area</strong></th>
-      <th><strong>Club</strong></th>
+      <th%(v)s><strong>&nbsp;</strong></th>
+      <th%(v)s><strong>Area</strong></th>
+      <th%(v)s><strong>Club</strong></th>
   </tr>
   </thead>
   <tbody>
-""")
+""" % styles)
 
 # We want to go down, not across...
 incol1 = (1 + len(lucky)) / 2# Number of items in the first column.  
